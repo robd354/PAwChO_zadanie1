@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport">
+    <title>Sprawdź pogodę</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div>
+        <header>
+            <h1><i></i>Weather app</h1>
+        </header>
+        <main>
+            <form id="form-weather">
+                <div>
+                    <label for="city-select">City</label>
+                    <select id="city-select">
+                        <option>Warsaw</option>
+                        <option>London</option>
+                        <option>Berlin</option>
+                        <option>Paris</option>
+                        <option>Athens</option>
+                        <option>Rome</option>
+                    </select>
+                </div>
+                <button type="submit">Check weather</button>
+            </form>
+
+            <div id="weather-output"></div>
+        </main>
+    </div>
+    <script src="weather.js"></script>
+</body>
+
+</html>

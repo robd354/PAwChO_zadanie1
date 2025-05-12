@@ -6,5 +6,5 @@ const AUTHOR = 'Robert Dajek';
 
 app.use(express.static('public'))
   .listen(PORT, () => {
-    console.log(`Serwer działa na porcie ${PORT} — Autor: ${AUTHOR}`);
+    console.log(`Serwer działa na porcie ${PORT} — Autor: ${AUTHOR} ${new Date().toString()}`);
   });

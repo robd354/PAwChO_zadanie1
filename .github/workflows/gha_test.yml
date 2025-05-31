@@ -15,7 +15,7 @@ jobs:
     # Zmienne środowiskowe
     env:
       DOCKERHUB_REPO: robd354/lab8zadanie1 
-      GHCR_REPO: ghcr.io/robd354/PAwChO_zadanie1
+      GHCR_REPO: ghcr.io/robd354/pawcho_zadanie1
       BUILD_CACHE: robd354/lab8zadanie1:cache
 
     steps:

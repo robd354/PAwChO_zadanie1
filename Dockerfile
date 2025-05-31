@@ -8,8 +8,8 @@ RUN apk add --no-cache curl
 WORKDIR /app
 
 # Kopiujemy plik package.json oraz instalujemy zależności npm
-COPY ./package.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Kopiujemy resztę źródeł
 COPY . .

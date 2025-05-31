@@ -17,7 +17,6 @@ jobs:
       DOCKERHUB_REPO: robd354/lab8zadanie1 
       GHCR_REPO: ghcr.io/robd354/PAwChO_zadanie1
       BUILD_CACHE: robd354/lab8zadanie1:cache
-      TRIVY_VERSION: 0.17.0
 
     steps:
       
@@ -75,7 +74,7 @@ jobs:
       
       # Skan obrazu Trivy – jeżeli wykryje HIGH lub CRITICAL, przerwie workflow
       - name: Scan built amd64 image with Trivy
-        uses: aquasecurity/trivy-action@v${{ env.TRIVY_VERSION }}
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.GHCR_REPO }}:sha-${{ github.sha }}-scan-amd64
           severity: CRITICAL,HIGH

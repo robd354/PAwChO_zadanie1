@@ -14,7 +14,7 @@ jobs:
     
     # Zmienne środowiskowe
     env:
-      DOCKERHUB_REPO: robd354/lab8zadanie1 
+      DOCKERHUB_REPO: robd354/lab8zadanie1
       GHCR_REPO: ghcr.io/robd354/pawcho_zadanie1
       BUILD_CACHE: robd354/lab8zadanie1:cache
 
@@ -93,4 +93,4 @@ jobs:
           push: true
           cache-from: type=registry,ref=${{ env.BUILD_CACHE }}
           cache-to: type=registry,ref=${{ env.BUILD_CACHE }},mode=max
-          tags: ${{ env.GHCR_REPO }}:${{ steps.meta.outputs.tags }}
+          tags: robd354/lab8zadanie1:v1.0

@@ -1,0 +1,97 @@
+name: GHAction zadanie2
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  ci_step:
+    name: Build, tag and push Docker image
+    runs-on: ubuntu-latest
+
+    
+    # Zmienne środowiskowe
+    env:
+      DOCKERHUB_REPO: robd354/lab8zadanie1 
+      GHCR_REPO: ghcr.io/robd354/PAwChO_zadanie1
+      BUILD_CACHE: robd354/lab8zadanie1:cache
+      TRIVY_VERSION: 0.17.0
+
+    steps:
+      
+      - name: Checkout the source repository
+        uses: actions/checkout@v4 #pobranie kodu źródłowego
+
+      # Definicja metadanych Dockera
+      - name: Docker metadata definitions
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKERHUB_REPO }}
+          flavor: latest=false
+          tags: |
+            type=sha,priority=100,prefix=sha-,format=short
+            type=semver,priority=200,pattern={{version}}
+
+      # Przygotowanie QEMU
+      - name: QEMU set-up
+        uses: docker/setup-qemu-action@v3
+
+      # Przygotowanie buildx
+      - name: Buildx set-up
+        uses: docker/setup-buildx-action@v3
+
+      # Logowanie do DockerHub
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Logowanie do GHCR
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      
+      # Budowa obrazu tylko dla architektury linux/amd64 do zeskanowania
+      - name: Build amd64 image for CVE scan
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: false
+          load: true
+          cache-from: type=registry,ref=${{ env.BUILD_CACHE }}
+          cache-to: type=registry,ref=${{ env.BUILD_CACHE }},mode=max
+          tags: ${{ env.GHCR_REPO }}:sha-${{ github.sha }}-scan-amd64
+
+      
+      # Skan obrazu Trivy – jeżeli wykryje HIGH lub CRITICAL, przerwie workflow
+      - name: Scan built amd64 image with Trivy
+        uses: aquasecurity/trivy-action@v${{ env.TRIVY_VERSION }}
+        with:
+          image-ref: ${{ env.GHCR_REPO }}:sha-${{ github.sha }}-scan-amd64
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+     
+      # Budowa finalnego obrazu, jeżeli Trivy nie znalazł podatności HIGH/CRITICAL
+      - name: Build and push Docker image (multi-arch)
+        if: success()
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          cache-from: type=registry,ref=${{ env.BUILD_CACHE }}
+          cache-to: type=registry,ref=${{ env.BUILD_CACHE }},mode=max
+          tags: ${{ env.GHCR_REPO }}:${{ steps.meta.outputs.tags }}

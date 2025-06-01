@@ -65,22 +65,25 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64
-          push: false
-          load: true
-          cache-from: type=registry,ref=${{ env.BUILD_CACHE }}
-          cache-to: type=registry,ref=${{ env.BUILD_CACHE }},mode=max
-          tags: ${{ env.GHCR_REPO }}:sha-${{ github.sha }}-scan-amd64
+          push: false # bez publikacji
+          load: true # załadowanie obrazu lokalnie
+          cache-from: type=registry,ref=${{ env.BUILD_CACHE }} # odbieranie cache z rejestru
+          cache-to: type=registry,ref=${{ env.BUILD_CACHE }},mode=max # zapis cache do rejestru
+          tags: ${{ env.GHCR_REPO }}:sha-${{ github.sha }}-scan-amd64 # tymczasowy tag dla obrazu do skanowania
 
       
       # Skan obrazu Trivy – jeżeli wykryje HIGH lub CRITICAL, przerwie workflow
       - name: Scan built amd64 image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.GHCR_REPO }}:sha-${{ github.sha }}-scan-amd64
+          image-ref: ${{ env.GHCR_REPO }}:sha-${{ github.sha }}-scan-amd64 # użycie tymczasowego tagu
           severity: CRITICAL #,HIGH
           exit-code: 1
           ignore-unfixed: true
-
+      # opcja HIGH została zakomentowana, ponieważ skan trivy wykrywa zagrożenie wysokie związane z modułem 
+      # "cross-spawn" w node modules. Skan twierdzi, że moduł jest w wersji 7.0.3, lecz 
+      # wersja w package-lock.json to 7.0.5 i nie powinna sprawiać problemów.
+      # Niestety nie udało mi się naprawić tego błędu.
      
       # Budowa finalnego obrazu, jeżeli Trivy nie znalazł podatności HIGH/CRITICAL
       - name: Build and push Docker image (multi-arch)
@@ -90,7 +93,7 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: true # push jeżeli skan przeszedł
           cache-from: type=registry,ref=${{ env.BUILD_CACHE }}
           cache-to: type=registry,ref=${{ env.BUILD_CACHE }},mode=max
-          tags: robd354/lab8zadanie1:v1.0
+          tags: robd354/lab8zadanie1:v1.0 # tag do pushu

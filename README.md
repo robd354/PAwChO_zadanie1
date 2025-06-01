@@ -5,3 +5,5 @@ d) Warstwy: docker history [OPTIONS] IMAGE, Rozmiar: docker images [OPTIONS] [RE
 
 
 Dockerhub: https://hub.docker.com/repository/docker/robd354/lab8zadanie1/general
+
+zadanie2 opracowanie łańcucha gha
